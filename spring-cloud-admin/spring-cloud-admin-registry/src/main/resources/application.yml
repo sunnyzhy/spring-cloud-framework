@@ -1,0 +1,21 @@
+server:
+  port: 9100
+spring:
+  application:
+    name: spring-cloud-admin-registry
+  security:
+    user:
+      name: admin
+      password: admin
+
+eureka:
+  instance:
+    prefer-ip-address: true
+    hostname: ${spring.cloud.client.ip-address}
+    instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+

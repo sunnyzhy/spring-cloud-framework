@@ -1,0 +1,77 @@
+server:
+  port: 9000
+spring:
+  application:
+    name: spring-cloud-admin-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          # 开启从注册中心动态创建路由的功能，利用微服务名进行路由
+          enabled: true
+      routes:
+        - id: uaa
+          # 路由条件，如果匹配到 /api/uaa/**，就把请求转发到配置的 uri
+          predicates:
+            - Path=/api/uaa/**
+          # 过滤条件，过滤掉 /api/uaa
+          filters:
+            - StripPrefix=2
+          # lb = LoadBalancerClient
+          # gateway 将使用 LoadBalancerClient 把 spring-cloud-uaa 通过 eureka 解析为实际的主机和端口，并进行负载均衡
+          uri: lb://spring-cloud-uaa
+      # 全局熔断
+      default-filters:
+        # spring-cloud-starter-gateway:3.0.3 使用的是 CircuitBreaker GatewayFilter Factory，而不再是 Hystrix GatewayFilter Factory
+        - name: CircuitBreaker
+          args:
+            name: myCircuitBreaker
+            fallbackUri: forward:/fallback
+  redis:
+    host: 20.0.0.252
+    port: 6379
+    database: 12
+    password: saftop9854
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: -1
+        max-idle: 8
+        min-idle: 1
+    timeout: 3000
+
+eureka:
+  instance:
+    prefer-ip-address: true
+    hostname: ${spring.cloud.client.ip-address}
+    instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}
+  client:
+    service-url:
+      defaultZone: http://admin:admin@${eureka.instance.hostname}:9100/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+info:
+  build:
+    artifactId: @project.artifactId@
+    version: @project.version@
+
+feign:
+  remote:
+    application:
+      uaa: spring-cloud-admin-uaa
+
+jwt:
+  # 密钥
+  secret-key: zhy-123456
+  # 过期时间，单位是分钟
+  expire-time: 15
+  # 刷新过期时间，单位是分钟
+  refresh-expire-time: 10
+
+logging:
+  file:
+    name: ./log/run.log

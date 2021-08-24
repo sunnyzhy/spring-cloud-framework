@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="spring-cloud-admin-common" />
+        <module name="spring-cloud-admin-registry" />
+        <module name="spring-cloud-admin-uaa" />
+        <module name="spring-cloud-admin-gateway" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="spring-cloud-admin" target="1.8" />
+      <module name="spring-cloud-admin-common" target="12" />
+      <module name="spring-cloud-admin-gateway" target="12" />
+      <module name="spring-cloud-admin-registry" target="12" />
+      <module name="spring-cloud-admin-uaa" target="12" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="spring-cloud-admin" options="-parameters" />
+      <module name="spring-cloud-admin-common" options="-parameters" />
+      <module name="spring-cloud-admin-gateway" options="-parameters" />
+      <module name="spring-cloud-admin-registry" options="-parameters" />
+      <module name="spring-cloud-admin-uaa" options="-parameters" />
+    </option>
+  </component>
+</project>

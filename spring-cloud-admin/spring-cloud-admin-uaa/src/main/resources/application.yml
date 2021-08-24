@@ -1,0 +1,44 @@
+server:
+  port: 9001
+spring:
+  application:
+    name: spring-cloud-admin-uaa
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://20.0.3.106:3306/z_base?characterEncodeing=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+    druid:
+      filter:
+        stat:
+          enabled: false
+      initial-size: 1
+      min-idle: 1
+      max-active: 20
+      test-on-borrow: true
+      stat-view-servlet:
+        allow: true
+
+eureka:
+  instance:
+    prefer-ip-address: true
+    hostname: ${spring.cloud.client.ip-address}
+    instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}
+  client:
+    service-url:
+      defaultZone: http://admin:admin@${eureka.instance.hostname}:9100/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+info:
+  build:
+    artifactId: @project.artifactId@
+    version: @project.version@
+
+logging:
+  file:
+    name: ./log/run.log

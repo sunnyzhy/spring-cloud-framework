@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.springframework.cloud.admin.uaa.mapper.BaseDataGroupUserMapper">
+  <resultMap id="BaseResultMap" type="org.springframework.cloud.admin.uaa.model.BaseDataGroupUser">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="data_group_id" jdbcType="INTEGER" property="dataGroupId" />
+    <result column="user_id" jdbcType="INTEGER" property="userId" />
+    <result column="crt_time" jdbcType="TIMESTAMP" property="crtTime" />
+    <result column="crt_user" jdbcType="VARCHAR" property="crtUser" />
+    <result column="crt_name" jdbcType="VARCHAR" property="crtName" />
+    <result column="crt_host" jdbcType="VARCHAR" property="crtHost" />
+  </resultMap>
+</mapper>
