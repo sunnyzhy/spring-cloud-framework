@@ -12,7 +12,7 @@
         </plugin>
 
         <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
-                        connectionURL="jdbc:mysql://20.0.3.106:3306/z_base?useSSL=false"
+                        connectionURL="jdbc:mysql://20.0.7.106:3306/z_base?useSSL=false"
                         userId="root"
                         password="root">
         </jdbcConnection>

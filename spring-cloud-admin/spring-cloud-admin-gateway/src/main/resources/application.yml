@@ -9,6 +9,7 @@ spring:
         locator:
           # 开启从注册中心动态创建路由的功能，利用微服务名进行路由
           enabled: true
+          lower-case-service-id: true
       routes:
         - id: uaa
           # 路由条件，如果匹配到 /api/uaa/**，就把请求转发到配置的 uri
@@ -16,16 +17,16 @@ spring:
             - Path=/api/uaa/**
           # 过滤条件，过滤掉 /api/uaa
           filters:
+            - Local
             - StripPrefix=2
           # lb = LoadBalancerClient
           # gateway 将使用 LoadBalancerClient 把 spring-cloud-uaa 通过 eureka 解析为实际的主机和端口，并进行负载均衡
-          uri: lb://spring-cloud-uaa
-      # 全局熔断
+          uri: lb://spring-cloud-admin-uaa
+      # 全局过滤
       default-filters:
-        # spring-cloud-starter-gateway:3.0.3 使用的是 CircuitBreaker GatewayFilter Factory，而不再是 Hystrix GatewayFilter Factory
+        # 全局熔断 spring-cloud-starter-gateway:3.0.3 使用的是 CircuitBreaker GatewayFilter Factory，而不再是 Hystrix GatewayFilter Factory
         - name: CircuitBreaker
           args:
-            name: myCircuitBreaker
             fallbackUri: forward:/fallback
   redis:
     host: 20.0.0.252
@@ -39,6 +40,11 @@ spring:
         max-idle: 8
         min-idle: 1
     timeout: 3000
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          public-key-location: classpath:public.key
 
 eureka:
   instance:
@@ -63,10 +69,10 @@ feign:
   remote:
     application:
       uaa: spring-cloud-admin-uaa
+  okhttp:
+    enabled: true
 
 jwt:
-  # 密钥
-  secret-key: zhy-123456
   # 过期时间，单位是分钟
   expire-time: 15
   # 刷新过期时间，单位是分钟

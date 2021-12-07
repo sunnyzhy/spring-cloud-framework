@@ -8,6 +8,7 @@
         <module>spring-cloud-admin-gateway</module>
         <module>spring-cloud-admin-registry</module>
         <module>spring-cloud-admin-uaa</module>
+        <module>spring-cloud-admin-oauth</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -24,6 +25,8 @@
         <java.version>1.8</java.version>
         <spring-boot.version>2.5.1</spring-boot.version>
         <spring-cloud.version>2020.0.3</spring-cloud.version>
+        <spring-cloud.oauth2.version>2.2.5.RELEASE</spring-cloud.oauth2.version>
+        <jackson.version>2.13.0</jackson.version>
         <eureka.version>3.0.3</eureka.version>
         <gateway.version>3.0.3</gateway.version>
         <resilience4j.version>2.0.2</resilience4j.version>
@@ -37,8 +40,11 @@
         <mapper.version>2.1.5</mapper.version>
         <tk.mybatis.mapper.version>4.1.5</tk.mybatis.mapper.version>
         <openfeign.version>3.0.3</openfeign.version>
-        <jwt.version>3.16.0</jwt.version>
+        <reactivefeign.version>3.1.5</reactivefeign.version>
+        <reactivefeign2.version>2.0.31</reactivefeign2.version>
         <redis-reactive.version>2.5.1</redis-reactive.version>
+        <nimbus-jose-jwt.version>8.2.1</nimbus-jose-jwt.version>
+        <oauth2-resource-server.version>5.6.0</oauth2-resource-server.version>
 
         <!-- plugin -->
         <versions.version>2.8.1</versions.version>
@@ -191,13 +197,6 @@
                 <version>${mapper.version}</version>
             </dependency>
 
-            <!-- jwt -->
-            <dependency>
-                <groupId>com.auth0</groupId>
-                <artifactId>java-jwt</artifactId>
-                <version>${jwt.version}</version>
-            </dependency>
-
             <!-- redis-reactive -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
@@ -216,6 +215,51 @@
                         <artifactId>spring-cloud-starter</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+
+            <!-- reactivefeign -->
+            <dependency>
+                <groupId>com.playtika.reactivefeign</groupId>
+                <artifactId>feign-reactor-cloud</artifactId>
+                <version>${reactivefeign.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.playtika.reactivefeign</groupId>
+                <artifactId>feign-reactor-spring-configuration</artifactId>
+                <version>${reactivefeign.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.playtika.reactivefeign</groupId>
+                <artifactId>feign-reactor-webclient</artifactId>
+                <version>${reactivefeign.version}</version>
+            </dependency>
+
+            <!-- spring-security -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-security</artifactId>
+                <version>${spring-cloud.oauth2.version}</version>
+            </dependency>
+
+            <!-- spring-oauth2 -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-oauth2</artifactId>
+                <version>${spring-cloud.oauth2.version}</version>
+            </dependency>
+
+            <!-- jwt -->
+            <dependency>
+                <groupId>com.nimbusds</groupId>
+                <artifactId>nimbus-jose-jwt</artifactId>
+                <version>${nimbus-jose-jwt.version}</version>
+            </dependency>
+
+            <!-- oauth2-resource-server -->
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-oauth2-resource-server</artifactId>
+                <version>${oauth2-resource-server.version}</version>
             </dependency>
 
             <!-- common 版本号必须在 dependency 里明确声明 -->

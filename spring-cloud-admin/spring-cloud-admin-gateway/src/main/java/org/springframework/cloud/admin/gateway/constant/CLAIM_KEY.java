@@ -8,8 +8,6 @@ public enum CLAIM_KEY {
     TOKEN_ID(0, "TOKEN_ID", "租户ID"),
     USER_ID(1, "USER_ID", "用户ID"),
     USER_NAME(2, "USER_NAME", "用户名"),
-    USER_TYPE(3, "USER_TYPE", "用户类型"),
-    USER_STATUS(4, "USER_STATUS", "用户状态"),
     TENANT_ID(5, "TENANT_ID", "租户ID");
 
     private final int value;

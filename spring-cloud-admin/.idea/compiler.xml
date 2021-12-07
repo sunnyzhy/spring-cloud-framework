@@ -11,14 +11,16 @@
         <module name="spring-cloud-admin-registry" />
         <module name="spring-cloud-admin-uaa" />
         <module name="spring-cloud-admin-gateway" />
+        <module name="spring-cloud-admin-oauth" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="spring-cloud-admin" target="1.8" />
-      <module name="spring-cloud-admin-common" target="12" />
-      <module name="spring-cloud-admin-gateway" target="12" />
-      <module name="spring-cloud-admin-registry" target="12" />
-      <module name="spring-cloud-admin-uaa" target="12" />
+      <module name="spring-cloud-admin-common" target="1.8" />
+      <module name="spring-cloud-admin-gateway" target="1.8" />
+      <module name="spring-cloud-admin-oauth" target="1.8" />
+      <module name="spring-cloud-admin-registry" target="1.8" />
+      <module name="spring-cloud-admin-uaa" target="1.8" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
@@ -26,6 +28,7 @@
       <module name="spring-cloud-admin" options="-parameters" />
       <module name="spring-cloud-admin-common" options="-parameters" />
       <module name="spring-cloud-admin-gateway" options="-parameters" />
+      <module name="spring-cloud-admin-oauth" options="-parameters" />
       <module name="spring-cloud-admin-registry" options="-parameters" />
       <module name="spring-cloud-admin-uaa" options="-parameters" />
     </option>

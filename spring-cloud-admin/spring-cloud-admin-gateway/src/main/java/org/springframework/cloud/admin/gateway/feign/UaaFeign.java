@@ -1,12 +1,11 @@
 package org.springframework.cloud.admin.gateway.feign;
 
-import org.springframework.cloud.admin.common.to.AutTo;
+import org.springframework.cloud.admin.common.to.LoginTo;
 import org.springframework.cloud.admin.common.to.UserTo;
 import org.springframework.cloud.admin.common.vo.ResponseEntityVo;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import reactor.core.publisher.Mono;
 
 /**
  * @author zhy
@@ -23,6 +22,6 @@ import reactor.core.publisher.Mono;
  */
 @FeignClient(value = "${feign.remote.application.uaa:spring-cloud-admin-uaa}")
 public interface UaaFeign {
-    @PostMapping(value = "/api/aut")
-    Mono<ResponseEntityVo<UserTo>> aut(@RequestBody AutTo autTo);
+    @PostMapping(value = "/api/login")
+    ResponseEntityVo<UserTo> login(@RequestBody LoginTo loginTo);
 }

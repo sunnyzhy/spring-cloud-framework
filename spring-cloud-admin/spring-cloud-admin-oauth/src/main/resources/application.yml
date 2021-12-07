@@ -1,0 +1,61 @@
+server:
+  port: 9001
+
+eureka:
+  instance:
+    prefer-ip-address: true
+    hostname: ${spring.cloud.client.ip-address}
+    instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}
+  client:
+    service-url:
+      defaultZone: http://admin:admin@${eureka.instance.hostname}:9100/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+info:
+  build:
+    artifactId: @project.artifactId@
+    version: @project.version@
+
+spring:
+  application:
+    name: spring-cloud-admin-oauth
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://20.0.3.107:3306/z_oauth?characterEncodeing=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+    druid:
+      min-idle: 1
+      max-active: 20
+      test-on-borrow: true
+      filter:
+        stat:
+          enabled: false
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+
+logging:
+  level:
+    org.springframework.jdbc.core: debug # 打印 oauth2 内置的 sql 日志
+    org.springframework.jdbc.core.StatementCreatorUtils: trace
+    org:
+      springframework:
+        security:
+          oauth:
+            mapper: debug # 打印 mysql 日志
+  file:
+    name: ./log/run.log
+
+oauth:
+  http:
+    permit: /css/**,/js/**,/images/**,/oauth/**
+    login-page: /oauth/login
+    login-processing-url: /oauth/login/process
+  token:
+    expiration: 120 # token 有效期, 单位: 分钟
