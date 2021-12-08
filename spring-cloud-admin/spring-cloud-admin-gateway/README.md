@@ -192,3 +192,7 @@ IsjyoiWMowGs9HG9uGBo0c3Z7GOQnvUO03Iobpd2tHKkkMG9JW7bpxC297NiL/I4
 6WzMVZpeimJwNz24eWceTCGCySA+8Y9qknwZzaaiXwwXKGbjzxzi9QKZYlW1CP5H
 9wIDAQAB
 ```
+
+#### 4 复制公钥文件
+
+把文件 ```public.key``` 复制到项目的 ```resources``` 目录下。
