@@ -1,4 +1,4 @@
-package org.springframework.cloud.admin.gateway.config;
+package org.springframework.cloud.admin.gateway.bean;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  */
 @Configuration
 @Slf4j
-public class PublicKeyConfig {
+public class PublicKeyBean {
     @Bean
     public RSAPublicKey publicKey() throws Exception {
         Resource resource = new ClassPathResource("public.key");

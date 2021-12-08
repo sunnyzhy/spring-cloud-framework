@@ -5,10 +5,10 @@ package org.springframework.cloud.admin.gateway.constant;
  * @date 2021/6/25 11:31
  */
 public enum CLAIM_KEY {
-    TOKEN_ID(0, "TOKEN_ID", "租户ID"),
-    USER_ID(1, "USER_ID", "用户ID"),
-    USER_NAME(2, "USER_NAME", "用户名"),
-    TENANT_ID(5, "TENANT_ID", "租户ID");
+    TOKEN_ID(0, "token_id", "租户ID"),
+    USER_ID(1, "user_id", "用户ID"),
+    USER_NAME(2, "user_name", "用户名"),
+    TENANT_ID(5, "tenant_id", "租户ID");
 
     private final int value;
     private final String name;
