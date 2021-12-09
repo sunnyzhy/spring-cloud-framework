@@ -139,7 +139,7 @@ public class GatewayFilterImpl implements GatewayFilter, Ordered {
                     DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(bytes);
                     return Mono.just(buffer);
                 });
-                // 下面的将请求体再次封装写回到request里，传到下一级，否则，由于请求体已被消费，后续的服务将取不到值
+                // 把请求体再次封装到 request 里，继续向下传递，否则，由于请求体已被消费，后续将取不到
                 ServerHttpRequest mutatedRequest = new ServerHttpRequestDecorator(exchange.getRequest()) {
                     @Override
                     public Flux<DataBuffer> getBody() {
