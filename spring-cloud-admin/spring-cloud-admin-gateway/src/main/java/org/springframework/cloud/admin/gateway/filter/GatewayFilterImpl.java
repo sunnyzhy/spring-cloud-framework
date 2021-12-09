@@ -2,7 +2,6 @@ package org.springframework.cloud.admin.gateway.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.cloud.admin.common.to.UserTo;
 import org.springframework.cloud.admin.common.utils.ResponseUtil;
@@ -12,14 +11,19 @@ import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.admin.gateway.utils.JwtUtil;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.nio.charset.StandardCharsets;
 import java.security.interfaces.RSAPublicKey;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,8 +62,8 @@ public class GatewayFilterImpl implements GatewayFilter, Ordered {
         }
 
         // 修改 HTTP 请求的上下文信息
-        HttpRequestContext context = setHttpRequestContext(exchange, user);
-        if (context == null) {
+        ServerWebExchange exchange1 = resetServerWebExchange(exchange, user);
+        if (exchange1 == null) {
             return responseFailed(exchange.getResponse(), HttpStatus.FORBIDDEN);
         }
 
@@ -67,7 +71,7 @@ public class GatewayFilterImpl implements GatewayFilter, Ordered {
 
 
         // 如果以上的验证都通过，就执行 chain 上的其他业务流程
-        return chain.filter(context.getExchange());
+        return resetFilter(exchange1, chain);
 //        return chain.filter(exchange).then(Mono.fromRunnable(() ->
 //        {
 //            // 获取请求地址
@@ -90,7 +94,7 @@ public class GatewayFilterImpl implements GatewayFilter, Ordered {
 
     /**
      * 修改 HTTP 请求的上下文信息
-     *
+     * <p>
      * 主要用于修改/添加 ServerHttpRequest 的 headers(ServerHttpRequest.getHeaders() 是 ReadOnlyHttpHeaders 类型)
      * 所以需要用 build() 方法修改/添加自定义的 header
      *
@@ -98,7 +102,7 @@ public class GatewayFilterImpl implements GatewayFilter, Ordered {
      * @param user
      * @return
      */
-    private HttpRequestContext setHttpRequestContext(ServerWebExchange exchange, UserTo user) {
+    private ServerWebExchange resetServerWebExchange(ServerWebExchange exchange, UserTo user) {
         if (user == null) {
             return null;
         }
@@ -112,16 +116,40 @@ public class GatewayFilterImpl implements GatewayFilter, Ordered {
                 headers.set(k, v);
             });
         };
-        HttpRequestContext context = new HttpRequestContext();
-        context.setRequest(request.mutate().headers(headersConsumer).build());
-        context.setExchange(exchange.mutate().request(context.request).build());
-        return context;
+        ServerHttpRequest request1 = request.mutate().headers(headersConsumer).build();
+        return exchange.mutate().request(request1).build();
     }
 
-    @Data
-    class HttpRequestContext {
-        private ServerHttpRequest request;
-        private ServerWebExchange exchange;
+    /**
+     * 特殊处理 POST/PUT 请求
+     * @param exchange
+     * @param chain
+     * @return
+     */
+    private Mono<Void> resetFilter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        HttpMethod method = exchange.getRequest().getMethod();
+        if (method == HttpMethod.POST || method == HttpMethod.PUT) {
+            return DataBufferUtils.join(exchange.getRequest().getBody()).flatMap(dataBuffer -> {
+                byte[] bytes = new byte[dataBuffer.readableByteCount()];
+                dataBuffer.read(bytes);
+                String body = new String(bytes, StandardCharsets.UTF_8);
+                exchange.getAttributes().put("POST_BODY", body);
+                DataBufferUtils.release(dataBuffer);
+                Flux<DataBuffer> cachedFlux = Flux.defer(() -> {
+                    DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(bytes);
+                    return Mono.just(buffer);
+                });
+                // 下面的将请求体再次封装写回到request里，传到下一级，否则，由于请求体已被消费，后续的服务将取不到值
+                ServerHttpRequest mutatedRequest = new ServerHttpRequestDecorator(exchange.getRequest()) {
+                    @Override
+                    public Flux<DataBuffer> getBody() {
+                        return cachedFlux;
+                    }
+                };
+                return chain.filter(exchange.mutate().request(mutatedRequest).build());
+            });
+        } else {
+            return chain.filter(exchange);
+        }
     }
-
 }
