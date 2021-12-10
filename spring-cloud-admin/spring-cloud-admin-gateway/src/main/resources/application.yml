@@ -28,6 +28,15 @@ spring:
         - name: CircuitBreaker
           args:
             fallbackUri: forward:/fallback
+#      globalcors:
+#        cors-configurations:
+#          '[/**]':
+#            allowCredentials: true
+#            allowedOriginPatterns: "*"
+#            allowedMethods: "*"
+#            allowedHeaders: "*"
+#            maxAge: 18000
+#        add-to-simple-url-handler-mapping: true
   redis:
     host: 20.0.0.252
     port: 6379
@@ -72,11 +81,8 @@ feign:
   okhttp:
     enabled: true
 
-jwt:
-  # 过期时间，单位是分钟
-  expire-time: 15
-  # 刷新过期时间，单位是分钟
-  refresh-expire-time: 10
+circuit-breaker:
+  timeout: 30000
 
 logging:
   file:
