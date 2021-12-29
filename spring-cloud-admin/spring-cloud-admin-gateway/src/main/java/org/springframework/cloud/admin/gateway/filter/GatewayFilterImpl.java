@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.cloud.admin.common.to.UserTo;
 import org.springframework.cloud.admin.common.utils.ResponseUtil;
+import org.springframework.cloud.admin.gateway.utils.GatewayContext;
 import org.springframework.cloud.admin.gateway.utils.HeaderUtil;
+import org.springframework.cloud.admin.gateway.utils.RequestCovertUtil;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.admin.gateway.utils.JwtUtil;
@@ -15,6 +17,7 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -127,29 +130,35 @@ public class GatewayFilterImpl implements GatewayFilter, Ordered {
      * @return
      */
     private Mono<Void> resetFilter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        HttpMethod method = exchange.getRequest().getMethod();
-        if (method == HttpMethod.POST || method == HttpMethod.PUT) {
-            return DataBufferUtils.join(exchange.getRequest().getBody()).flatMap(dataBuffer -> {
-                byte[] bytes = new byte[dataBuffer.readableByteCount()];
-                dataBuffer.read(bytes);
-                String body = new String(bytes, StandardCharsets.UTF_8);
-                exchange.getAttributes().put("POST_BODY", body);
-                DataBufferUtils.release(dataBuffer);
-                Flux<DataBuffer> cachedFlux = Flux.defer(() -> {
-                    DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(bytes);
-                    return Mono.just(buffer);
-                });
-                // 把请求体再次封装到 request 里，继续向下传递，否则，由于请求体已被消费，后续将取不到
-                ServerHttpRequest mutatedRequest = new ServerHttpRequestDecorator(exchange.getRequest()) {
-                    @Override
-                    public Flux<DataBuffer> getBody() {
-                        return cachedFlux;
-                    }
-                };
-                return chain.filter(exchange.mutate().request(mutatedRequest).build());
-            });
-        } else {
-            return chain.filter(exchange);
+        ServerHttpRequest request = exchange.getRequest();
+
+        // 初始化GatewayContext
+        GatewayContext gatewayContext = new GatewayContext();
+        String path = request.getPath().pathWithinApplication().value();
+        gatewayContext.setPath(path);
+        gatewayContext.getFormData().addAll(request.getQueryParams());
+        gatewayContext.setIpAddress(String.valueOf(request.getRemoteAddress()));
+        HttpHeaders headers = request.getHeaders();
+        gatewayContext.setHeaders(headers);
+
+        // 注意，因为webflux的响应式编程 不能再采取原先的编码方式 即应该先将gatewayContext放入exchange中，否则其他地方可能取不到
+        /**
+         * save gateway context into exchange
+         */
+        exchange.getAttributes().put(GatewayContext.CACHE_GATEWAY_CONTEXT, gatewayContext);
+
+        // 处理参数
+        MediaType contentType = headers.getContentType();
+        long contentLength = headers.getContentLength();
+        if (contentLength > 0) {
+            if (MediaType.APPLICATION_JSON.equals(contentType)) {
+                return RequestCovertUtil.readJsonData(exchange, chain, gatewayContext);
+            }
+            if (MediaType.APPLICATION_FORM_URLENCODED.equals(contentType)) {
+                return RequestCovertUtil.readFormData(exchange, chain, gatewayContext);
+            }
         }
+
+        return chain.filter(exchange);
     }
 }
