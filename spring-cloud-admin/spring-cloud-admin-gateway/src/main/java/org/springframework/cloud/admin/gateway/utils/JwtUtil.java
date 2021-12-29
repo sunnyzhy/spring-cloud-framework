@@ -5,6 +5,7 @@ import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.cloud.admin.common.to.UserTo;
 import org.springframework.cloud.admin.common.utils.UuidUtil;
 import org.springframework.cloud.admin.common.vo.ResponseEntityVo;
@@ -63,7 +64,7 @@ public class JwtUtil {
         try {
             JWSObject data = JWSObject.parse(token);
             JWSVerifier verifier = new RSASSAVerifier(publicKey);
-            long expTime = data.getPayload().toJSONObject().getAsNumber("exp").longValue();
+            long expTime = MapUtils.getLong(data.getPayload().toJSONObject(), "exp");
             long currentTime = System.currentTimeMillis();
             if (currentTime > expTime) {
                 return false;

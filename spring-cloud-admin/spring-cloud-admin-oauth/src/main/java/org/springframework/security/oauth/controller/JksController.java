@@ -1,9 +1,9 @@
 package org.springframework.security.oauth.controller;
 
 import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.shaded.json.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.minidev.json.JSONObject;
 import org.springframework.cloud.admin.common.utils.ResponseMonoUtil;
 import org.springframework.cloud.admin.common.vo.ResponseEntityVo;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +22,8 @@ public class JksController {
 
     @GetMapping(value = "/oauth/key")
     public Mono<ResponseEntityVo<JSONObject>> publicKey() {
-        JSONObject publicKey = jwkSet.toJSONObject();
+        JSONObject publicKey = new JSONObject();
+        publicKey.putAll(jwkSet.toJSONObject());
         return ResponseMonoUtil.ok(publicKey);
     }
 }
