@@ -113,7 +113,7 @@
                 <version>${commons-collections4.version}</version>
             </dependency>
 
-            <!-- common 版本号必须在 dependency 里明确声明 -->
+            <!-- common -->
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-admin-common</artifactId>
