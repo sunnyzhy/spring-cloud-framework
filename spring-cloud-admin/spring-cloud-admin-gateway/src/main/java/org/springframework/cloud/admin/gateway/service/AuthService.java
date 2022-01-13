@@ -51,7 +51,6 @@ public class AuthService {
             ResponseEntityVo<UserTo> responseEntityVo = future.get();
             if (responseEntityVo.getCode() == HttpStatus.OK.value()) {
                 UserTo user = responseEntityVo.getData();
-                tokenVo.setUserStatus(user.getStatus());
                 TokenEntity tokenEntity = JwtUtil.generateToken(authFeign, user, forkJoinPool);
                 tokenVo.setToken(tokenEntity.getToken());
             }
@@ -92,6 +91,5 @@ public class AuthService {
         mono.subscribe(System.out::println);
         // 初始化TokenVo
         tokenVo.setToken(token.getToken());
-        tokenVo.setUserStatus(user.getStatus());
     }
 }

@@ -9,5 +9,4 @@ import lombok.Data;
 @Data
 public class TokenVo {
     private String token;
-    private Integer userStatus;
 }

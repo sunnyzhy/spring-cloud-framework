@@ -18,6 +18,9 @@
   <div id="app">
     <div class="login-container">
       <el-form label-position="left" label-width="0px" class="login-form" th:action="${loginUrl}" method="POST">
+        <el-form-item style="margin-bottom: 22px">
+          <h1 align="center" style="color: white;">OAuth2.0</h1>
+        </el-form-item>
         <el-form-item prop="userName" style="margin-bottom: 22px">
           <el-input size="small" name="username" v-model="loginForm.userName" autoComplete="on"
                     placeholder="用户名(默认:admin)" prefix-icon="el-icon-user">

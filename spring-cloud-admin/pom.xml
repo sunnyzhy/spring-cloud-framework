@@ -9,6 +9,8 @@
         <module>spring-cloud-admin-registry</module>
         <module>spring-cloud-admin-uaa</module>
         <module>spring-cloud-admin-oauth</module>
+        <module>spring-cloud-admin-oauth-client</module>
+        <module>spring-cloud-admin-minio</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -25,12 +27,15 @@
         <java.version>1.8</java.version>
         <spring-cloud.version>2020.0.5</spring-cloud.version>
         <spring-cloud.oauth2.version>2.2.5.RELEASE</spring-cloud.oauth2.version>
+        <okhttp3.version>4.9.3</okhttp3.version>
         <crypto.version>5.6.1</crypto.version>
         <druid.version>1.2.8</druid.version>
         <mybatis.version>2.2.0</mybatis.version>
         <mapper.version>2.1.5</mapper.version>
         <tk.mybatis.mapper.version>4.1.5</tk.mybatis.mapper.version>
         <commons-collections4.version>4.4</commons-collections4.version>
+        <minio.version>8.3.4</minio.version>
+        <fastjson.version>1.2.79</fastjson.version>
 
         <!-- plugin -->
         <mybatis-plugin.version>1.3.6</mybatis-plugin.version>
@@ -96,6 +101,20 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-collections4</artifactId>
                 <version>${commons-collections4.version}</version>
+            </dependency>
+
+            <!-- minio -->
+            <dependency>
+                <groupId>io.minio</groupId>
+                <artifactId>minio</artifactId>
+                <version>${minio.version}</version>
+            </dependency>
+
+            <!-- fastjson -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.version}</version>
             </dependency>
 
             <!-- common -->

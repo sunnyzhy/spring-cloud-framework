@@ -6,14 +6,35 @@ import router from './router'
 import store from './store'
 import i18n from './lang'
 import ElementUI from 'element-ui'
+import JsonViewer from 'vue-json-viewer'
 import 'element-ui/lib/theme-chalk/index.css'
-import './assets/iconfont/iconfont.css'
+import { getToken } from './utils/token'
 
 Vue.config.productionTip = false
 
 Vue.use(ElementUI, {
   size: 'medium',
   i18n: (key, value) => i18n.t(key, value)
+})
+
+Vue.use(JsonViewer)
+
+const whiteList = ['/login', '/auth', '/favicon.ico']
+
+router.beforeEach((to, from, next) => {
+  if (getToken()) {
+    if (to.path === '/login' || to.path === '/auth') {
+      next({ path: '/' })
+    } else {
+      next()
+    }
+  } else {
+    if (whiteList.indexOf(to.path) !== -1) {
+      next()
+    } else {
+      next('/login')
+    }
+  }
 })
 
 /* eslint-disable no-new */

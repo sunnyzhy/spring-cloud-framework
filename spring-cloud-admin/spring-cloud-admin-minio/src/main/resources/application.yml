@@ -1,0 +1,34 @@
+server:
+  port: 9004
+
+eureka:
+  instance:
+    prefer-ip-address: true
+    hostname: ${spring.cloud.client.ip-address}
+    instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}
+  client:
+    service-url:
+      defaultZone: http://admin:admin@${eureka.instance.hostname}:9100/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+info:
+  build:
+    artifactId: @project.artifactId@
+    version: @project.version@
+
+spring:
+  application:
+    name: spring-cloud-admin-minio
+
+logging:
+  file:
+    name: ./log/run.log
+
+minio:
+  endpoint: http://20.0.0.252:9000 # Minio 服务器地址
+  accessKey: admin # Minio 凭证账号(长度至少 3 个字符)，系统默认:minioadmin
+  secretKey: password # Minio 凭证密码(长度至少 8 个字符)，系统默认:minioadmin

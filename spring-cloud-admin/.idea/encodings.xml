@@ -3,6 +3,8 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/spring-cloud-admin-common/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/spring-cloud-admin-gateway/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/spring-cloud-admin-minio/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/spring-cloud-admin-oauth-client/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/spring-cloud-admin-oauth/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/spring-cloud-admin-registry/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/spring-cloud-admin-uaa/src/main/java" charset="UTF-8" />

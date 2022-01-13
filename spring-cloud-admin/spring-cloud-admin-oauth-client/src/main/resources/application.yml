@@ -1,0 +1,48 @@
+server:
+  port: 9003
+
+eureka:
+  instance:
+    prefer-ip-address: true
+    hostname: ${spring.cloud.client.ip-address}
+    instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}
+  client:
+    service-url:
+      defaultZone: http://admin:admin@${eureka.instance.hostname}:9100/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+info:
+  build:
+    artifactId: @project.artifactId@
+    version: @project.version@
+
+spring:
+  application:
+    name: spring-cloud-admin-oauth-client
+
+logging:
+  file:
+    name: ./log/run.log
+
+security:
+  oauth2:
+    client:
+      client-auth-code:
+        client-id: client
+        client-secret: secret
+        grant-type: authorization_code
+        scope: read,write
+        user-authorization-uri: http://localhost:9001/oauth/authorize
+        access-token-uri: http://localhost:9001/oauth/token
+        pre-established-redirect-uri: http://20.0.3.9:9003/authorized
+        use-current-uri: false
+
+oauth:
+  http:
+    permit: /css/**,/js/**,/images/**,/oauth/**
+    login-page: /oauth/login
+    login-processing-url: /oauth/login/process
