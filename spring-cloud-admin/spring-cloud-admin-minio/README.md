@@ -1,6 +1,6 @@
 # spring-cloud-admin-minio
 
-## MinIO 分布式部署
+## minio 分布式部署
 
 [minio下载](https://min.io/download 'minio下载')
 
@@ -157,7 +157,7 @@ WantedBy=multi-user.target
 
 ### FAQ
 
-如果服务启动失败，则:
+#### minio 服务启动失败
 
 - 查看服务日志:
 
@@ -177,4 +177,109 @@ WantedBy=multi-user.target
   drwxr-xr-x. 9 root root 125 Jan 12 14:14 .minio.sys
   
   # rm -rf .minio.sys
+   ```
+
+## minio 开发需注意的事项
+
+```xml
+<dependency>
+    <groupId>io.minio</groupId>
+    <artifactId>minio</artifactId>
+    <version>8.3.4</version>
+</dependency>
+```
+
+### 升级 okhttp3
+
+okhttp3 的版本不能低于 4.8.1，升级的时候，只需要在父模块的 ```properties``` 里配置 okhttp3 版本即可。
+
+```xml
+    <properties>
+        <okhttp3.version>4.9.3</okhttp3.version>
+    </properties>
+```
+
+源码: ```.\io\minio\minio\8.3.4\minio-8.3.4.jar!\io\minio\S3Base.class```
+
+```java
+  static {
+    try {
+      RequestBody.create(new byte[0], (MediaType)null);
+    } catch (NoSuchMethodError var1) {
+      throw new RuntimeException("Unsupported OkHttp library found. Must use okhttp >= 4.8.1", var1);
+    }
+
+    DEFAULT_CONNECTION_TIMEOUT = TimeUnit.MINUTES.toMillis(5L);
+    TRACE_QUERY_PARAMS = ImmutableSet.of("retention", "legal-hold", "tagging", "uploadId");
+  }
+```
+
+### 命名 bucket 的名称
+
+bucket 的名称必须满足正则表达式: ```^[a-z0-9][a-z0-9\\.\\-]+[a-z0-9]$```
+
+源码: ```.\io\minio\minio\8.3.4\minio-8.3.4.jar!\io\minio\BucketArgs.class```
+
+```java
+  protected void validateBucketName(String name) {
+    this.validateNotNull(name, "bucket name");
+    if (name.length() >= 3 && name.length() <= 63) {
+      String msg;
+      if (name.contains("..")) {
+        msg = "bucket name cannot contain successive periods. For more information refer http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html";
+        throw new IllegalArgumentException(name + " : " + msg);
+      } else if (!name.matches("^[a-z0-9][a-z0-9\\.\\-]+[a-z0-9]$")) {
+        msg = "bucket name does not follow Amazon S3 standards. For more information refer http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html";
+        throw new IllegalArgumentException(name + " : " + msg);
+      }
+    } else {
+      throw new IllegalArgumentException(name + " : bucket name must be at least 3 and no more than 63 characters long");
+    }
+  }
+```
+
+正确的命名:
+
+```java
+.bucket("example.minio")
+.bucket("example-minio")
+.bucket("example.minio-bucket")
+.bucket("example-minio.bucket")
+```
+
+### 命名 object 的名称
+
+object 方法会根据层级自动创建目录。
+
+```java
+.object("example.jpg")
+.object("/example.jpg")
+.object("level1/level2/example.jpg")
+.object("/level1/level2/example.jpg")
+```
+
+### 指定 ContentType
+
+上传文件的时候，尽量指定 ContentType，如果不指定的话，ContentType 默认为: ```application/octet-stream``` 
+
+源码: ```.\io\minio\minio\8.3.4\minio-8.3.4.jar!\io\minio\PutObjectArgs.class```
+
+```java
+    public String contentType() throws IOException {
+        String contentType = super.contentType();
+        return contentType != null ? contentType : "application/octet-stream";
+    }
+```
+
+- FilePart(webflux)
+
+   ```java
+   List<String> contentTypeList = file.headers().get("Content-Type");
+   .contentType((contentTypeList == null || contentTypeList.isEmpty()) ? null : contentTypeList.get(0))
+   ```
+
+- MultipartFile(web)
+
+   ```java
+   .contentType(file.getContentType())
    ```
