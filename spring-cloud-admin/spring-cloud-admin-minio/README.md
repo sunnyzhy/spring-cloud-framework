@@ -13,6 +13,15 @@
 |192.168.0.102|/usr/local/minio/bin|/usr/local/minio/upload|/usr/local/minio/run|/usr/local/minio/log|
 |192.168.0.103|/usr/local/minio/bin|/usr/local/minio/upload|/usr/local/minio/run|/usr/local/minio/log|
 
+***注: 在服务器数量少于 4 台的情况下，可以做伪集群部署，此时只需要修改端口号即可:***
+
+```
+192.168.0.100:9000
+192.168.0.100:9001
+192.168.0.100:9002
+192.168.0.100:9003
+```
+
 ### 2 创建目录
 
 4 台服务器都执行以下命令:
