@@ -39,9 +39,9 @@
 
 ```bash
 #!/bin/bash
-export MINIO_ACCESS_KEY=admin
-export MINIO_SECRET_KEY=password
-/usr/local/minio/bin/minio server --address "192.168.0.100:9000" \
+export MINIO_ROOT_USER=admin
+export MINIO_ROOT_PASSWORD=password
+/usr/local/minio/bin/minio server --address "192.168.0.100:9000" --console-address ":7000" \
 http://192.168.0.100:9000/usr/local/minio/upload \
 http://192.168.0.101:9000/usr/local/minio/upload \
 http://192.168.0.102:9000/usr/local/minio/upload \
@@ -53,9 +53,9 @@ http://192.168.0.103:9000/usr/local/minio/upload \
 
 ```bash
 #!/bin/bash
-export MINIO_ACCESS_KEY=admin
-export MINIO_SECRET_KEY=password
-/usr/local/minio/bin/minio server --address "192.168.0.101:9000" \
+export MINIO_ROOT_USER=admin
+export MINIO_ROOT_PASSWORD=password
+/usr/local/minio/bin/minio server --address "192.168.0.101:9000" --console-address ":7000" \
 http://192.168.0.100:9000/usr/local/minio/upload \
 http://192.168.0.101:9000/usr/local/minio/upload \
 http://192.168.0.102:9000/usr/local/minio/upload \
@@ -67,9 +67,9 @@ http://192.168.0.103:9000/usr/local/minio/upload \
 
 ```bash
 #!/bin/bash
-export MINIO_ACCESS_KEY=admin
-export MINIO_SECRET_KEY=password
-/usr/local/minio/bin/minio server --address "192.168.0.102:9000" \
+export MINIO_ROOT_USER=admin
+export MINIO_ROOT_PASSWORD=password
+/usr/local/minio/bin/minio server --address "192.168.0.102:9000" --console-address ":7000" \
 http://192.168.0.100:9000/usr/local/minio/upload \
 http://192.168.0.101:9000/usr/local/minio/upload \
 http://192.168.0.102:9000/usr/local/minio/upload \
@@ -81,9 +81,9 @@ http://192.168.0.103:9000/usr/local/minio/upload \
 
 ```bash
 #!/bin/bash
-export MINIO_ACCESS_KEY=admin
-export MINIO_SECRET_KEY=password
-/usr/local/minio/bin/minio server --address "192.168.0.103:9000" \
+export MINIO_ROOT_USER=admin
+export MINIO_ROOT_PASSWORD=password
+/usr/local/minio/bin/minio server --address "192.168.0.103:9000" --console-address ":7000" \
 http://192.168.0.100:9000/usr/local/minio/upload \
 http://192.168.0.101:9000/usr/local/minio/upload \
 http://192.168.0.102:9000/usr/local/minio/upload \
@@ -134,6 +134,22 @@ WantedBy=multi-user.target
 
 ### 9 使用 nginx 负载均衡
 
+在日志里增加 ```"$upstream_status" "$upstream_addr"``` 以便打印真实的服务端 IP 地址:
+
+```xml
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"'
+					  '"$upstream_status" "$upstream_addr"';
+}
+```
+
+#### 9.1 后台调用 endpoint
+
 在 nginx.conf 文件里增加如下配置:
 
 ```conf
@@ -145,15 +161,50 @@ WantedBy=multi-user.target
     }
 
     server {
-        listen       80;
-        
-        location /minio {
-            proxy_pass http://lb_minio/;
+        listen 9000;
+        server_name localhost;
+		access_log  logs/minio.access.log  main;
+		error_log  logs/minio.error.log;
+		
+        location / {
+            proxy_set_header   X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-Host  $host:$server_port;
+            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header   X-Forwarded-Proto  $http_x_forwarded_proto;
+            proxy_set_header   Host $http_host;
+   
+            proxy_pass http://lb_minio;
         }
-    }    
+    } 
 ```
 
-此时，minio 对外的 ENDPOINT 为: ```http://${NGINX_HOST}/minio```
+此时，minio 对外的 ENDPOINT 为: ```http://${NGINX_HOST}:9000```
+
+#### 9.2 前端访问 console
+
+在 nginx.conf 文件里增加如下配置:
+
+```conf
+    upstream lb_minio_console {
+		server 192.168.0.100:7000;
+		server 192.168.0.101:7000;
+		server 192.168.0.102:7000;
+		server 192.168.0.103:7000;
+    }
+
+    server {
+        listen 7000;
+        server_name localhost;
+		access_log  logs/minio.access.log  main;
+		error_log  logs/minio.error.log;
+		
+        location / {
+            proxy_pass http://lb_minio_console;
+        }
+    }
+```
+
+此时，在浏览器的地址栏输入 ```http://${NGINX_HOST}:7000``` 即可访问 minio 的 Console 页面。
 
 ### FAQ
 
