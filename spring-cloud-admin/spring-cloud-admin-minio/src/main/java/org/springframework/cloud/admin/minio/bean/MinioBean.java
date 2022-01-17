@@ -1,6 +1,8 @@
 package org.springframework.cloud.admin.minio.bean;
 
+import io.minio.MinioClient;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,10 +13,27 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class MinioBean {
+    private String separator = "/";
+
     @ConfigurationProperties(prefix = "minio")
-    @Bean
+    @Bean(name = "minio")
     public Minio minio() {
         return new Minio();
+    }
+
+    @Bean
+    public MinioClient minioClient(@Qualifier(value = "minio") Minio minio) {
+        String endpoint = minio.getEndpoint();
+        // 去掉 endpoint 尾端的 /
+        while (endpoint.lastIndexOf(separator) == endpoint.length() - 1) {
+            endpoint = endpoint.substring(0, endpoint.lastIndexOf(separator));
+        }
+        minio.setEndpoint(endpoint);
+        // 创建 minioClient
+        return MinioClient.builder()
+                .endpoint(endpoint)
+                .credentials(minio.accessKey, minio.secretKey)
+                .build();
     }
 
     @Data
