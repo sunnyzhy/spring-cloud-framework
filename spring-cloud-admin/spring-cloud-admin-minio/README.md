@@ -343,3 +343,16 @@ object 方法会根据层级自动创建目录。
    ```java
    .contentType(file.getContentType())
    ```
+
+### nginx 传输文件的限制
+
+nginx 默认文件传输的大小是 1M，传输超过 1M 的文件会报异常: ```413 Request Entity Too Large```，此时可以在 ```http{ }``` 或 ```server{ }``` 或 ```location{ }``` 中添加以下配置:
+
+```conf
+	client_body_buffer_size 10m;
+	client_max_body_size 10m;
+```
+
+- http{ }: 作用于全局 nginx
+- server{ }: 作用于当前 server
+- location{ }: 作用于当前路由
