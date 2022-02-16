@@ -8,6 +8,8 @@ import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.CodecConfigurer;
+import org.springframework.http.codec.support.DefaultServerCodecConfigurer;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
@@ -48,5 +50,22 @@ public class HttpMessageBean {
         list.add(MediaType.APPLICATION_JSON);
         mappingJackson2HttpMessageConverter.setSupportedMediaTypes(list);
         return mappingJackson2HttpMessageConverter;
+    }
+
+    /**
+     * 在 spring-cloud-gateway 中，获取 body 后重新创建 ServerRequest 时，org.springframework.core.io.buffer.LimitedDataBufferList 会判断接收的数据大小, 默认为 262144, 即 256KB
+     * 如果超过 256KB, 就会抛出异常
+     * <p>
+     * 有两种解决方法:
+     * 1. 配置 maxInMemorySize 为 >262144 的合适数值
+     * 2. 配置 maxInMemorySize = -1, 不限制大小
+     *
+     * @return
+     */
+    @Bean
+    public CodecConfigurer codecConfigurer() {
+        CodecConfigurer codecConfigurer = new DefaultServerCodecConfigurer();
+        codecConfigurer.defaultCodecs().maxInMemorySize(-1);
+        return codecConfigurer;
     }
 }

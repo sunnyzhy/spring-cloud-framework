@@ -8,11 +8,10 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.CodecConfigurer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.reactive.function.server.HandlerStrategies;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
@@ -31,8 +30,6 @@ import java.util.Map;
  */
 @Slf4j
 public class RequestCovertUtil {
-    private static final List<HttpMessageReader<?>> messageReaders = HandlerStrategies.withDefaults().messageReaders();
-
     /**
      * ReadFormData
      *
@@ -41,7 +38,7 @@ public class RequestCovertUtil {
      * @return
      */
     public static Mono<Void> readFormData(ServerWebExchange exchange, GatewayFilterChain chain,
-                                          GatewayContext gatewayContext) {
+                                          GatewayContext gatewayContext, CodecConfigurer codecConfigurer) {
         final ServerHttpRequest request = exchange.getRequest();
         HttpHeaders headers = request.getHeaders();
 
@@ -123,7 +120,7 @@ public class RequestCovertUtil {
      * @param chain
      * @return
      */
-    public static Mono<Void> readJsonData(ServerWebExchange exchange, GatewayFilterChain chain, GatewayContext gatewayContext) {
+    public static Mono<Void> readJsonData(ServerWebExchange exchange, GatewayFilterChain chain, GatewayContext gatewayContext, CodecConfigurer codecConfigurer) {
         Mono<Void> mono = DataBufferUtils.join(exchange.getRequest().getBody()).flatMap(dataBuffer -> {
             byte[] bytes = new byte[dataBuffer.readableByteCount()];
             dataBuffer.read(bytes);
@@ -142,7 +139,7 @@ public class RequestCovertUtil {
             };
 
             ServerWebExchange mutatedExchange = exchange.mutate().request(mutatedRequest).build();
-            return ServerRequest.create(mutatedExchange, messageReaders).bodyToMono(String.class)
+            return ServerRequest.create(mutatedExchange, codecConfigurer.getReaders()).bodyToMono(String.class)
                     .doOnNext(objectValue -> {
                         gatewayContext.setCacheBody(objectValue);
                     }).then(chain.filter(mutatedExchange));

@@ -13,20 +13,16 @@ import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.admin.gateway.utils.JwtUtil;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.CodecConfigurer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.nio.charset.StandardCharsets;
 import java.security.interfaces.RSAPublicKey;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,6 +37,7 @@ import java.util.function.Consumer;
 public class GatewayFilterImpl implements GatewayFilter, Ordered {
     private final ObjectMapper objectMapper;
     private final RSAPublicKey publicKey;
+    private final CodecConfigurer codecConfigurer;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -125,6 +122,7 @@ public class GatewayFilterImpl implements GatewayFilter, Ordered {
 
     /**
      * 特殊处理 POST/PUT 请求
+     *
      * @param exchange
      * @param chain
      * @return
@@ -152,10 +150,10 @@ public class GatewayFilterImpl implements GatewayFilter, Ordered {
         long contentLength = headers.getContentLength();
         if (contentLength > 0) {
             if (MediaType.APPLICATION_JSON.equals(contentType)) {
-                return RequestCovertUtil.readJsonData(exchange, chain, gatewayContext);
+                return RequestCovertUtil.readJsonData(exchange, chain, gatewayContext, codecConfigurer);
             }
             if (MediaType.APPLICATION_FORM_URLENCODED.equals(contentType)) {
-                return RequestCovertUtil.readFormData(exchange, chain, gatewayContext);
+                return RequestCovertUtil.readFormData(exchange, chain, gatewayContext, codecConfigurer);
             }
         }
 
